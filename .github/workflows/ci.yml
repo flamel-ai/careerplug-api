@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    # Weekly upstream-drift check. Deliberately NOT on every push: the drift job
+    # calls CareerPlug's live API, and hammering a third party's endpoint on
+    # every commit is both rude and a good way to get the CI runner's IP
+    # rate-limited (which is exactly what happened during this repo's
+    # development). Weekly is frequent enough to catch a spec change.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
 
 # Least privilege: CI only reads the repo.
 permissions:
@@ -30,6 +38,9 @@ jobs:
   # credentials: /swagger_doc is public.
   spec-drift:
     runs-on: ubuntu-latest
+    # Only on the weekly schedule or a manual run -- never on push/PR. See the
+    # note on `schedule` above.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
