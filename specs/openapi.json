@@ -1,0 +1,1592 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CareerPlug API Integration Documentation",
+    "version": "1.0.0",
+    "description": "CareerPlug API v1. Spec converted from the live Swagger 2.0 document at https://api.careerplug.com/swagger_doc. See the repository README for authentication, the partner job-feed surface, and known gaps."
+  },
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "jobs",
+      "description": "Operations about jobs"
+    },
+    {
+      "name": "apps",
+      "description": "Operations about apps"
+    },
+    {
+      "name": "locations",
+      "description": "Operations about locations"
+    },
+    {
+      "name": "departments",
+      "description": "Operations about departments"
+    },
+    {
+      "name": "employments",
+      "description": "Operations about employments"
+    },
+    {
+      "name": "brands",
+      "description": "Operations about brands"
+    },
+    {
+      "name": "users",
+      "description": "Operations about users"
+    }
+  ],
+  "paths": {
+    "/jobs/{id}": {
+      "get": {
+        "description": "Details of a single job",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Job id.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of a single job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "jobs"
+        ],
+        "operationId": "getJobsId"
+      }
+    },
+    "/jobs": {
+      "get": {
+        "description": "Provides access to all publicly visible jobs for the owner's account",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "description": "Search on name or description.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "postal_code",
+            "description": "Search by Postal Code (uses postal_code_radius).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "postal_code_radius",
+            "description": "Number of miles from postal_code.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "employment_id",
+            "description": "Narrow by employment type.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "location_id",
+            "description": "Narrow by location.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "department_id",
+            "description": "Narrow by department.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "brand_id",
+            "description": "Narrow by brand.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show jobs from other accounts. This parameter is ignored unless your account has the ability/permission to access or other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Jobs by account class. <br>This parameter is ignored unless your account has access to Jobs from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provides access to all publicly visible jobs for the owner's account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "jobs"
+        ],
+        "operationId": "getJobs"
+      }
+    },
+    "/apps": {
+      "post": {
+        "description": "Add a new applicant to a job",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/postApps"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Add a new applicant to a job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboundApp"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "apps"
+        ],
+        "operationId": "postApps"
+      },
+      "get": {
+        "description": "Provides the ability to add and access existing applicants",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "job_id",
+            "description": "Search by job.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for applicants by account class. <br>This parameter is ignored unless your account has access to applicants from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "date_field",
+            "description": "Filter by date. <br>**Allowed values:** applied_at, hired_at, last_acted_on_at",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start_date",
+            "description": "The start date with which to filter the `date_field`. <br>Returns apps with a timestamp at or after midnight (12:00:00 AM) on the date specified<br>**format:** YYYY-MM-DD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end_date",
+            "description": "The end date with which to filter the `date_field`. <br>Returns apps with a timestamp up to and including 11:59:59PM on the date specified<br>**format:** YYYY-MM-DD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provides the ability to add and access existing applicants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/App"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "apps"
+        ],
+        "operationId": "getApps"
+      }
+    },
+    "/apps/{id}": {
+      "get": {
+        "description": "Details of a single applicant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Applicant id.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of a single applicant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/App"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "apps"
+        ],
+        "operationId": "getAppsId"
+      }
+    },
+    "/locations/{id}": {
+      "get": {
+        "description": "Details of a single Location",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "Location ID",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of a single Location",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Location"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "locations"
+        ],
+        "operationId": "getLocationsId"
+      }
+    },
+    "/locations": {
+      "get": {
+        "description": "One of the optional job-search parameters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show locations from other accounts (if enabled).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Locations by account class. <br>This parameter is ignored unless your account has access to Locations from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One of the optional job-search parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Location"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "locations"
+        ],
+        "operationId": "getLocations"
+      }
+    },
+    "/departments": {
+      "get": {
+        "description": "One of the optional job-search parameters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show departments from other accounts (if enabled).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Departments by account class. <br>This parameter is ignored unless your account has access to Departments from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One of the optional job-search parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleAccount"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "departments"
+        ],
+        "operationId": "getDepartments"
+      }
+    },
+    "/employments": {
+      "get": {
+        "description": "One of the optional job-search parameters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show employment types from other accounts (if enabled).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Employments by account class. <br>This parameter is ignored unless your account has access to Employments from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One of the optional job-search parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleAccount"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "employments"
+        ],
+        "operationId": "getEmployments"
+      }
+    },
+    "/brands": {
+      "get": {
+        "description": "One of the optional job-search parameters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show brands from other accounts (if enabled).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Brands by account class. <br>This parameter is ignored unless your account has access to Brands from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One of the optional job-search parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleAccount"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "brands"
+        ],
+        "operationId": "getBrands"
+      }
+    },
+    "/users/reset/{id}": {
+      "put": {
+        "description": "Reset access token for a single user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reset access token for a single user"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "operationId": "putUsersResetId"
+      }
+    },
+    "/users/reset": {
+      "post": {
+        "description": "Reset access tokens for all users",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aggregate": {
+                    "description": "Reset tokens for users from other accounts (if enabled).",
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reset access tokens for all users"
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "operationId": "postUsersReset"
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "description": "Lookup user by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lookup user by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "operationId": "getUsersId"
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Access basic user information, including login URLs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page of results to fetch.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "description": "Number of results to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "description": "Find user by email address.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregate",
+            "description": "Show users from other accounts (if enabled).",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_id",
+            "description": "Search by account. This parameter is ignored unless your account has access to applicants from other/related accounts.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account_class_ids[]",
+            "description": "Search for Users by account class. <br>This parameter is ignored unless your account has access to Users from other/related account classes.",
+            "required": false,
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access basic user information, including login URLs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "operationId": "getUsers"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.careerplug.com",
+      "description": "CareerPlug API (production)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "access_token",
+        "in": "query",
+        "description": "OAuth 2.0 access token passed as a QUERY parameter (not an Authorization header). This is how CareerPlug's Grape/WineBouncer API expects credentials."
+      },
+      "oauth2": {
+        "type": "oauth2",
+        "description": "Tokens are minted on https://app.careerplug.com (the Rails/Doorkeeper host), NOT on the API host. Access tokens expire after 48 hours. client_credentials issues NO refresh token -- re-mint on expiry. authorization_code issues a refresh token, and its authorization code must be exchanged within 10 minutes.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://app.careerplug.com/oauth/token",
+            "scopes": {
+              "global_partner_api": "Global partner integration access."
+            }
+          },
+          "authorizationCode": {
+            "authorizationUrl": "https://app.careerplug.com/oauth/authorize",
+            "tokenUrl": "https://app.careerplug.com/oauth/token",
+            "refreshUrl": "https://app.careerplug.com/oauth/token",
+            "scopes": {
+              "global_partner_api": "Global partner integration access."
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Job name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Job description"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "inactive",
+              "passive",
+              "incompatible",
+              "waiting",
+              "rejected"
+            ],
+            "description": "Current status"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State/Province"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "ZIP/Postal Code"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "employment": {
+            "$ref": "#/components/schemas/SimpleEntity",
+            "description": "Employment Type"
+          },
+          "job_template_name": {
+            "type": "string",
+            "description": "Job template name (if created from a template)"
+          },
+          "code": {
+            "type": "string",
+            "description": "Job code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Post date"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last updated"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location",
+            "description": "Job location"
+          },
+          "department": {
+            "$ref": "#/components/schemas/SimpleEntity",
+            "description": "Job department"
+          },
+          "prescreen_questions": {
+            "type": "object",
+            "description": "Prescreen question information (used for creating applicants)"
+          },
+          "brand": {
+            "$ref": "#/components/schemas/SimpleEntity",
+            "description": "Brand for job"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserRef",
+            "description": "Hiring manager"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "CareerPlug Account"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "status",
+          "city",
+          "state",
+          "postal_code",
+          "country",
+          "employment",
+          "created_at",
+          "updated_at",
+          "prescreen_questions",
+          "owner",
+          "account"
+        ],
+        "description": "V1_Entities_JobEntity model"
+      },
+      "SimpleEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of entity"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Location Id"
+          },
+          "name": {
+            "type": "string",
+            "description": "Location Name"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State"
+          },
+          "zip code": {
+            "type": "string",
+            "description": "Zipcode Wire name contains a space: `zip code`."
+          },
+          "street": {
+            "type": "string",
+            "description": "Street Address"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "number": {
+            "type": "string",
+            "description": "Location Number"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "Account"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "state",
+          "zip code",
+          "country",
+          "number",
+          "account"
+        ],
+        "description": "V1_Entities_LocationEntity model"
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of Account"
+          },
+          "slt_code": {
+            "type": "string",
+            "description": "SLT Code"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "UserRef": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "InboundApp": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Job ID"
+          },
+          "app": {
+            "$ref": "#/components/schemas/InboundApplicant",
+            "description": "Information about the applicant"
+          },
+          "prescreen_answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrescreenAnswer"
+            },
+            "description": "Answers to prescreen_questions specified on the job as an array"
+          }
+        },
+        "required": [
+          "job_id",
+          "app",
+          "prescreen_answers"
+        ],
+        "description": "V1_Entities_InboundAppEntity model"
+      },
+      "InboundApplicant": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State/Province"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "ZIP/Postal Code"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "source_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Source ID"
+          },
+          "recent_title": {
+            "type": "string",
+            "description": "Recent job title"
+          },
+          "recent_employer": {
+            "type": "string",
+            "description": "Recent employer"
+          },
+          "resume": {
+            "$ref": "#/components/schemas/Resume",
+            "description": "Resume: either text or file is required-- not both"
+          },
+          "cover_letter": {
+            "type": "string",
+            "description": "Cover Letter"
+          }
+        },
+        "required": [
+          "email",
+          "firstname",
+          "lastname",
+          "phone",
+          "city",
+          "state",
+          "postal_code",
+          "recent_title",
+          "recent_employer"
+        ]
+      },
+      "Resume": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Plain-text resume"
+          },
+          "file": {
+            "$ref": "#/components/schemas/ResumeFile",
+            "description": "File upload"
+          }
+        }
+      },
+      "ResumeFile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "File name"
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64-encoded file content"
+          },
+          "content_type": {
+            "type": "string",
+            "description": "MIME-Type of uploaded file"
+          }
+        },
+        "required": [
+          "name",
+          "data",
+          "content_type"
+        ]
+      },
+      "PrescreenAnswer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID from job/prescreen_questions/id"
+          },
+          "value": {
+            "type": "string",
+            "description": "Either entered value or specific job/prescreen_questions/options/value"
+          }
+        },
+        "required": [
+          "id",
+          "value"
+        ]
+      },
+      "postApps": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "$ref": "#/components/schemas/InboundApp"
+          }
+        },
+        "description": "Add a new applicant to a job"
+      },
+      "App": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "CareerPlug Account"
+          },
+          "job": {
+            "$ref": "#/components/schemas/SimpleAccount",
+            "description": "Job"
+          },
+          "app": {
+            "$ref": "#/components/schemas/Applicant",
+            "description": "Information about the applicant"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location",
+            "description": "Information about the applicants work location"
+          },
+          "hiring_step": {
+            "$ref": "#/components/schemas/SimpleEntity",
+            "description": "Name of hiring step (blank/null means New)"
+          },
+          "hiring_status": {
+            "type": "string",
+            "enum": [
+              "new_app",
+              "in_process",
+              "hired",
+              "inactive"
+            ],
+            "description": "Current hiring status"
+          },
+          "prescreen_questions": {
+            "$ref": "#/components/schemas/Prescreen",
+            "description": "Applicant response to a prescreen question"
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date applied"
+          },
+          "last_updated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of last update to applicant record"
+          },
+          "hired_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date hired"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start Date"
+          },
+          "source_name": {
+            "type": "string",
+            "description": "Source name"
+          },
+          "last_acted_on_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of last action taken on applicant"
+          }
+        },
+        "required": [
+          "id",
+          "account",
+          "job",
+          "app",
+          "hiring_status",
+          "applied_at"
+        ],
+        "description": "V1_Entities_AppEntity model"
+      },
+      "SimpleAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of entity"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "CareerPlug Account"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "account"
+        ],
+        "description": "V1_Entities_SimpleAccountEntity model"
+      },
+      "Applicant": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address"
+          },
+          "city": {
+            "type": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "description": "State/Province"
+          },
+          "postal_code": {
+            "type": "string",
+            "description": "ZIP/Postal Code"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country"
+          },
+          "recent_title": {
+            "type": "string",
+            "description": "Recent job title"
+          },
+          "recent_employer": {
+            "type": "string",
+            "description": "Recent employer"
+          },
+          "pay_type": {
+            "type": "string",
+            "description": "Pay type"
+          },
+          "pay_rate": {
+            "type": "string",
+            "description": "Pay rate"
+          },
+          "employment_type": {
+            "type": "string",
+            "description": "Employment type"
+          }
+        },
+        "required": [
+          "email",
+          "firstname",
+          "lastname",
+          "phone",
+          "city",
+          "state",
+          "postal_code",
+          "country",
+          "recent_title",
+          "recent_employer"
+        ]
+      },
+      "Prescreen": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID from job/prescreen_questions/id"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of prescreen question"
+          },
+          "answer": {
+            "type": "string",
+            "description": "Applicant response to prescreen question"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "answer"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address"
+          },
+          "firstname": {
+            "type": "string",
+            "description": "First name"
+          },
+          "lastname": {
+            "type": "string",
+            "description": "Last name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description"
+          },
+          "title": {
+            "type": "string",
+            "description": "Position title"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "recruiter_admin",
+              "recruiter",
+              "employee"
+            ],
+            "description": "Role"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "login_url": {
+            "type": "string",
+            "description": "Single-sign-on login URL"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account",
+            "description": "CareerPlug Account"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstname",
+          "lastname",
+          "role",
+          "phone",
+          "login_url",
+          "account"
+        ],
+        "description": "V1_Entities_UserEntity model"
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "name": "@flamel-ai/careerplug-api",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.33.0",
+  "description": "Clean, fully-typed TypeScript SDK for the CareerPlug API, generated from the live Swagger 2.0 spec (converted to OpenAPI 3.1) with zod validation. Includes OAuth 2.0 helpers and the partner job-feed reader.",
+  "type": "module",
+  "license": "BSD-3-Clause",
+  "author": "Flamel AI",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flamel-ai/careerplug-api.git"
+  },
+  "homepage": "https://github.com/flamel-ai/careerplug-api#readme",
+  "bugs": {
+    "url": "https://github.com/flamel-ai/careerplug-api/issues"
+  },
+  "keywords": [
+    "careerplug",
+    "ats",
+    "sdk",
+    "openapi",
+    "swagger",
+    "typescript",
+    "zod",
+    "jobs",
+    "recruiting"
+  ],
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "specs",
+    "docs",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "import": "./dist/auth.js",
+      "require": "./dist/auth.cjs",
+      "default": "./dist/auth.js"
+    },
+    "./feeds": {
+      "types": "./dist/feeds.d.ts",
+      "import": "./dist/feeds.js",
+      "require": "./dist/feeds.cjs",
+      "default": "./dist/feeds.js"
+    },
+    "./errors": {
+      "types": "./dist/errors.d.ts",
+      "import": "./dist/errors.js",
+      "require": "./dist/errors.cjs",
+      "default": "./dist/errors.js"
+    },
+    "./specs/openapi.json": "./specs/openapi.json",
+    "./specs/swagger_doc.json": "./specs/swagger_doc.json"
+  },
+  "scripts": {
+    "fetch-spec": "tsx scripts/fetch-spec.ts",
+    "generate": "tsx scripts/generate.ts",
+    "refresh": "pnpm fetch-spec && pnpm generate && pnpm gen-docs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --exclude \"**/*.integration.test.ts\"",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "build": "tsup",
+    "prepublishOnly": "pnpm build",
+    "gen-docs": "tsx scripts/gen-docs.ts"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.10.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.98.0",
+    "@types/node": "^22.10.2",
+    "swagger2openapi": "^7.0.8",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.5"
+  }
+}
