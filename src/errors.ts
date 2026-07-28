@@ -10,6 +10,8 @@
  *                                                              token rejected by the API
  *   {"error":"invalid_client", "error_description":"…"}        Doorkeeper credential failure
  *   HTTP Basic: Access denied.                                 a legacy non-OAuth endpoint
+ *   bare HTML 403, no x-request-id / x-runtime                 AWS load-balancer throttle;
+ *                                                              Ruby never saw the request
  */
 
 /** Base class for every error this SDK raises. */
@@ -36,11 +38,15 @@ export class CareerPlugAuthError extends CareerPlugError {
 }
 
 /**
- * Raised when the API accepts the request but rejects the token's authority.
+ * Raised when the API accepts the token but rejects its authority for a resource.
  *
- * The overwhelmingly common cause is a `client_credentials` token: it carries no
- * resource owner (`resource_owner_id: null`), and the v1 resource endpoints
- * appear to require a user-scoped token from the `authorization_code` flow.
+ * Usual causes, in order of likelihood:
+ *   1. The application is not provisioned for that resource. Granted scopes and
+ *      account access are configured per application on CareerPlug's side, so
+ *      this is not fixable from the client.
+ *   2. The resource needs a user-scoped token. Introspect via
+ *      `/oauth/token/info`: `resource_owner_id: null` means a
+ *      `client_credentials` token with no user attached.
  */
 export class CareerPlugUnauthorizedError extends CareerPlugError {
   constructor(message: string, options?: { status?: number; cause?: unknown }) {
@@ -74,10 +80,12 @@ export function explainCareerPlugError(body: unknown, status?: number): string |
 
   if (raw.includes("WineBouncer")) {
     return (
-      "The API rejected this token's authority. A client_credentials token has no resource " +
-      "owner and does not appear to satisfy the v1 resource endpoints; try the " +
-      "authorization_code flow, and confirm the application is provisioned for the endpoints " +
-      "you are calling."
+      "The token is valid but was not accepted for this resource. Most often the application " +
+      "is not provisioned for it (granted scopes and account access are set per application " +
+      "by CareerPlug). Introspect at app.careerplug.com/oauth/token/info: if " +
+      "`resource_owner_id` is null you hold a client_credentials token, and a user- or " +
+      "account-scoped resource may require the authorization_code flow. If provisioning looks " +
+      "correct, escalate to TechAM@careerplug.com."
     );
   }
   if (raw === "Unable to find endpoint") {
@@ -108,4 +116,37 @@ export function explainCareerPlugError(body: unknown, status?: number): string |
     return `The application is not permitted to request that scope (status ${status ?? "?"}).`;
   }
   return undefined;
+}
+
+/**
+ * True when a response came from the AWS load balancer rather than the Ruby
+ * application -- i.e. an infrastructure rate limit, not an auth decision.
+ *
+ * This matters because the throttle surfaces as a bare HTML `403`, which reads
+ * like a permissions failure and sends you debugging credentials that are
+ * completely fine. The reliable discriminator is that every real application
+ * response carries Rails' `x-request-id` and `x-runtime` headers, and a
+ * load-balancer response carries neither.
+ *
+ *   if (isInfrastructureThrottle(res)) {
+ *     // back off; do NOT retry immediately -- retries keep the rate elevated
+ *     // and extend the block. It clears on its own once traffic subsides.
+ *   }
+ */
+export function isInfrastructureThrottle(response: {
+  status: number;
+  headers: { get(name: string): string | null };
+}): boolean {
+  if (response.status !== 403 && response.status !== 429) return false;
+  const hasAppHeaders =
+    response.headers.get("x-request-id") !== null || response.headers.get("x-runtime") !== null;
+  return !hasAppHeaders;
+}
+
+/** Raised when a request is throttled at the edge before reaching the app. */
+export class CareerPlugThrottledError extends CareerPlugError {
+  constructor(message: string, options?: { status?: number; cause?: unknown }) {
+    super(message, options);
+    this.name = "CareerPlugThrottledError";
+  }
 }

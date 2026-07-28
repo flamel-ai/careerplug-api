@@ -63,7 +63,44 @@ const { data } = await getJobs({ query: { per_page: 50, postal_code: "78701" } }
 
 The auth layer mints a token, caches it for its 48-hour life, collapses concurrent mints into one request, appends it as the `access_token` **query parameter**, and retries once with a fresh token on a 401.
 
-> **Read [`docs/authentication.md`](docs/authentication.md) before you pick a grant type.** There is a known open issue with `client_credentials` — see [Known gaps](#known-gaps).
+> Both grant types are supported. See [Authentication](#authentication-in-30-seconds) below, or [`docs/authentication.md`](docs/authentication.md) for the full walkthrough.
+
+---
+
+## Authentication in 30 seconds
+
+Two grant types, both fully supported:
+
+**`client_credentials`** — for a custom/server-side integration. POST your credentials, get a 48-hour access token, use it until it expires, then mint another. No refresh token involved.
+
+```bash
+curl -X POST https://app.careerplug.com/oauth/token \
+  -d 'grant_type=client_credentials' \
+  -d "client_id=$CLIENT_ID" -d "client_secret=$CLIENT_SECRET" \
+  -d 'scope=global_partner_api'
+```
+```json
+{ "access_token": "…", "token_type": "Bearer", "expires_in": 172800,
+  "scope": "global_partner_api", "created_at": 1785259547 }
+```
+
+**`authorization_code`** — the typical user-centric flow. An administrator authorizes the app, you exchange the code (**within 10 minutes**) for an access token *plus* a refresh token, and refresh from then on.
+
+The SDK handles either one, including caching and automatic re-mint/refresh. Full walkthrough: [`docs/authentication.md`](docs/authentication.md).
+
+## Notes and caveats
+
+**Provisioning is per-application, and undocumented.** A token can mint successfully and still be declined by a given resource:
+
+```json
+{"error":"OAuth error: WineBouncer::Errors::OAuthUnauthorizedError"}
+```
+
+That means the API accepted the token but not its authority for that resource. Granted scopes and account access are configured per application on CareerPlug's side, so this is usually not fixable from the client. Introspect with `/oauth/token/info` to see what you are holding — `resource_owner_id: null` means a `client_credentials` token with no user attached, and a user- or account-scoped resource may require `authorization_code`. When provisioning looks right and it still fails: **TechAM@careerplug.com**.
+
+**A bare HTML `403` is a rate limit, not an auth failure.** If the headers show `server: awselb/2.0` with no `x-request-id`/`x-runtime`, you were throttled at the AWS load balancer and Ruby never saw the request. `isInfrastructureThrottle(response)` detects this. Back off rather than retrying; it clears on its own. CareerPlug documents no rate limits, so keep concurrency modest.
+
+**The feed surface cannot be enumerated.** S3 listing is off, so a directory path and a nonexistent feed both return `403`. You need the exact feed name from your partnerships contact.
 
 ---
 
@@ -132,26 +169,6 @@ Upstream defects are corrected in the **spec**, never by patching generated outp
 | OAuth flows entirely undeclared | No machine-readable way to discover how to get a token | Add `clientCredentials` + `authorizationCode`, pointed at the **OAuth** host |
 
 One upstream oddity is deliberately **preserved**: `Location` has a property literally named `zip code`, with a space. That is genuinely what the API returns, so renaming it would be a lie.
-
----
-
-## Known gaps
-
-Stated plainly, because a client that looks complete but 401s is worse than one that tells you why.
-
-**`client_credentials` tokens are rejected by every v1 endpoint.** Minting works and the token is valid (`/oauth/token/info` confirms `scope: ["global_partner_api"]`), but every resource endpoint answers:
-
-```json
-{"error":"OAuth error: WineBouncer::Errors::OAuthUnauthorizedError"}
-```
-
-This holds via both the query parameter and a bearer header. And `global_partner_api` is the **only** scope such an application may request — `public`, `partner_api`, `account_api`, `read`, `jobs`, `api`, and the empty string all return `invalid_scope`.
-
-Working hypothesis, **not yet confirmed**: the v1 endpoints require a *resource-owner* token, and `client_credentials` produces one with `resource_owner_id: null`. If so, account data needs the `authorization_code` flow, which yields a user-scoped token plus a refresh token. `CareerPlugAuth.authorizationCode(...)` implements it; completing consent requires a logged-in CareerPlug administrator.
-
-It may instead be a per-application provisioning setting. Either way the escalation path is the same: **TechAM@careerplug.com**.
-
-**The feed surface cannot be enumerated.** S3 listing is off, so a directory path and a nonexistent feed both return 403. You must know the exact feed name; ask your partnerships contact.
 
 ---
 

@@ -6,7 +6,7 @@ import {
   OOB_REDIRECT_URI,
   buildAuthorizeUrl,
 } from "../src/auth.js";
-import { CareerPlugAuthError } from "../src/errors.js";
+import { CareerPlugAuthError, isInfrastructureThrottle } from "../src/errors.js";
 import { createAuthenticatedFetch } from "../src/configure.js";
 
 const tokenResponse = (overrides: Record<string, unknown> = {}) =>
@@ -223,5 +223,28 @@ describe("createAuthenticatedFetch", () => {
     });
     await authed("https://api.careerplug.com/jobs");
     expect(inner).toHaveBeenCalledOnce();
+  });
+});
+
+describe("isInfrastructureThrottle", () => {
+  it("flags a bare 403 with no Rails headers as a throttle, not an auth failure", () => {
+    const res = new Response("<html>403 Forbidden</html>", {
+      status: 403,
+      headers: { server: "awselb/2.0" },
+    });
+    expect(isInfrastructureThrottle(res)).toBe(true);
+  });
+
+  it("does NOT flag a 403 that reached the app (Rails headers present)", () => {
+    const res = new Response("{}", {
+      status: 403,
+      headers: { "x-request-id": "abc-123", "x-runtime": "0.004" },
+    });
+    expect(isInfrastructureThrottle(res)).toBe(false);
+  });
+
+  it("ignores non-throttle statuses", () => {
+    expect(isInfrastructureThrottle(new Response("{}", { status: 401 }))).toBe(false);
+    expect(isInfrastructureThrottle(new Response("{}", { status: 200 }))).toBe(false);
   });
 });
