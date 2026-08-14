@@ -27,6 +27,36 @@ A quick way to tell which host you actually reached, when a request 404s:
 
 ---
 
+## Installation
+
+Published to the public npm registry as [`@flamel-ai/careerplug-api`](https://www.npmjs.com/package/@flamel-ai/careerplug-api).
+
+```bash
+pnpm add @flamel-ai/careerplug-api
+```
+
+**Requirements.** Node 18 or newer — the client uses global `fetch` and imports no Node builtins, so it also runs on Deno, Bun, Cloudflare Workers, and other `fetch`-based runtimes. Ships both ESM and CommonJS builds with bundled type declarations; `import` and `require` both work, no `@types` package needed.
+
+Two runtime dependencies, both already installed for you: [`zod`](https://www.npmjs.com/package/zod) (schema validation) and [`fast-xml-parser`](https://www.npmjs.com/package/fast-xml-parser) (feed parsing).
+
+**Entry points.** Import the whole surface, or just the part you need:
+
+| Import | Contains |
+|---|---|
+| `@flamel-ai/careerplug-api` | Everything — SDK operations, auth, feeds, errors |
+| `@flamel-ai/careerplug-api/feeds` | Job feeds only, zero credentials |
+| `@flamel-ai/careerplug-api/auth` | OAuth token minting and caching |
+| `@flamel-ai/careerplug-api/errors` | Error classes and type guards |
+| `@flamel-ai/careerplug-api/specs/openapi.json` | The OpenAPI 3 document itself |
+
+**Verifying what you installed.** Every release is published from GitHub Actions with a [provenance attestation](https://docs.npmjs.com/generating-provenance-statements), cryptographically tying the tarball to the workflow run and commit that built it. The attestation is linked from the [package page](https://www.npmjs.com/package/@flamel-ai/careerplug-api); to check it from the command line, note that pnpm has no equivalent subcommand, so this one step needs npm:
+
+```bash
+npm audit signatures
+```
+
+---
+
 ## Quick start
 
 ### Job feeds (no credentials required)
@@ -186,7 +216,7 @@ One upstream oddity is deliberately **preserved**: `Location` has a property lit
 ```bash
 pnpm install
 pnpm typecheck
-pnpm test              # 39 unit tests, no credentials needed
+pnpm test              # 42 unit tests, no credentials needed
 pnpm test:integration  # live round-trip; self-skips without credentials
 pnpm build
 ```
