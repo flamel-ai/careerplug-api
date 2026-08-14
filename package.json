@@ -74,7 +74,8 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "build": "tsup",
     "prepublishOnly": "pnpm build",
-    "gen-docs": "tsx scripts/gen-docs.ts"
+    "gen-docs": "tsx scripts/gen-docs.ts",
+    "prepare": "pnpm build"
   },
   "dependencies": {
     "fast-xml-parser": "^5.10.1",
