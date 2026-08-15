@@ -214,6 +214,44 @@ describe("createAuthenticatedFetch", () => {
     expect(inner).toHaveBeenCalledTimes(2);
   });
 
+  // A static token cannot be re-minted. Retrying would call invalidate(),
+  // destroy the only token, and surface "constructed without an access token"
+  // in place of the 401 the server actually sent.
+  it("returns the 401 instead of a mint error when the grant cannot re-mint", async () => {
+    const inner = vi.fn(
+      async () => new Response(JSON.stringify({ error: "nope" }), { status: 401 }),
+    );
+    const authed = createAuthenticatedFetch({
+      auth: CareerPlugAuth.staticToken("tok"),
+      fetch: inner as unknown as typeof globalThis.fetch,
+    });
+
+    const res = await authed("https://api.careerplug.com/jobs");
+
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "nope" });
+    expect(inner).toHaveBeenCalledOnce();
+  });
+
+  it("does not retry an authorization_code grant that holds no refresh token", async () => {
+    const inner = vi.fn(async () => new Response("{}", { status: 401 }));
+    const authed = createAuthenticatedFetch({
+      auth: CareerPlugAuth.authorizationCode({
+        clientId: "id",
+        clientSecret: "secret",
+        redirectUri: OOB_REDIRECT_URI,
+        accessToken: "tok",
+        accessTokenExpiresAt: Math.floor(Date.now() / 1000) + 3600,
+      }),
+      fetch: inner as unknown as typeof globalThis.fetch,
+    });
+
+    const res = await authed("https://api.careerplug.com/jobs");
+
+    expect(res.status).toBe(401);
+    expect(inner).toHaveBeenCalledOnce();
+  });
+
   it("does not retry when retryOnUnauthorized is off", async () => {
     const inner = vi.fn(async () => new Response("{}", { status: 401 }));
     const authed = createAuthenticatedFetch({

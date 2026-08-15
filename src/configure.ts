@@ -56,7 +56,11 @@ export function createAuthenticatedFetch(options: ConfigureOptions): typeof glob
 
     let response = await baseFetch(await withToken(request, token));
 
-    if (retry && response.status === 401 && replay) {
+    // Only retry when the grant can actually mint again. Invalidating a
+    // static token (or an authorization_code grant with no refresh token)
+    // throws away the only credential and replaces the server's 401 with a
+    // confusing auth-construction error.
+    if (retry && response.status === 401 && replay && options.auth.canReMint) {
       options.auth.invalidate();
       const fresh = await options.auth.getAccessToken();
       response = await baseFetch(await withToken(replay, fresh));

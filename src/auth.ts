@@ -10,7 +10,7 @@
  *
  *   2. The token travels as a QUERY parameter named `access_token`, not as an
  *      `Authorization: Bearer` header. This is what the spec's
- *      `securityDefinitions` declares, and a bearer header is rejected.
+ *      `securityDefinitions` declares, so it is what this client sends.
  *
  * Two grant types are supported, per CareerPlug's documentation:
  *
@@ -294,6 +294,21 @@ export class CareerPlugAuth {
       },
       params,
     );
+  }
+
+  /**
+   * Whether a 401 can be recovered by minting again.
+   *
+   * A static token has no credentials behind it, and an authorization_code
+   * grant needs a refresh token. For those, discarding the cached token
+   * destroys the only credential the caller has, and the next mint fails with
+   * a message about construction rather than the 401 the server sent. Callers
+   * that retry on 401 must check this first.
+   */
+  get canReMint(): boolean {
+    if (this.grant.kind === "static") return false;
+    if (this.grant.kind === "authorization_code") return Boolean(this.refreshToken);
+    return true;
   }
 
   private get skew(): number {
